@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-import os
 from pathlib import Path
+import os
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -24,16 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ['SECRET_KEY']
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', '.localhost']
-# SECURE_SSL_REDIRECT = True
-# SECURE_HSTS_SECONDS = 2
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# SECURE_SSL_CERTIFICATE = '你的证书路径'
-# SECURE_SSL_KEY = '你的私钥路径'
+SECURE_SSL_REDIRECT = False
+SECURE_HSTS_SECONDS = 2
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# SECURE_SSL_CERTIFICATE = './root/key/full_chain.pem'
+# SECURE_SSL_KEY = './root/key/private.key'
 
 # Application definition
 
@@ -44,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'sslserver',
     'chatbot',
 ]
 
