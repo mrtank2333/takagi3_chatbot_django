@@ -135,3 +135,18 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# VITS 语音合成服务基础地址（端点：/api/GetSpeech/）
+VITS_BASE_URL = 'http://localhost:23333'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler'},
+    },
+    'loggers': {
+        'chatbot.vits': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+        'django.request':  {'handlers': ['console'], 'level': 'ERROR', 'propagate': False},
+    },
+}

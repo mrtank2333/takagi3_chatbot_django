@@ -61,6 +61,17 @@
     /* 隐藏滚动条（Chrome、Safari和Opera） */
   }
 
+  #voiceButton {
+    background-color: transparent;
+    border: none;
+    float: right;
+    transform: translate(5%, -12%);
+    font-size: 20px;
+    color: white;
+    cursor: pointer;
+    line-height: 1;
+  }
+
   #randomPlayerButton {
     background-color: transparent;
     /* 设置背景颜色为透明 */
@@ -199,6 +210,7 @@
       <button id="randomPlayerButton">
         <img src="/static/img/icon/randomPlayer.webp" alt="Toggle">
       </button>
+      <button id="voiceButton" title="开启/关闭语音回复">🔇</button>
     </div>
     {% else %}
     <div class="card-header bg-primary text-white"><a style="color: yellow" href="login">Login</a> <a
@@ -263,6 +275,50 @@
   const messageForm = document.querySelector('.message-form');
   const messageInput = document.querySelector('.message-input');
   const sendButton = document.querySelector('.btn-send');
+
+  // 语音功能
+  let voiceEnabled = false;
+  let currentAudio = null;
+  const voiceButton = document.getElementById('voiceButton');
+
+  voiceButton.addEventListener('click', function () {
+    voiceEnabled = !voiceEnabled;
+    voiceButton.textContent = voiceEnabled ? '🔊' : '🔇';
+    voiceButton.title = voiceEnabled ? '关闭语音回复' : '开启语音回复';
+    if (!voiceEnabled && currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+  });
+
+  async function playVoice(text) {
+    try {
+      const resp = await fetch('/vits-speech/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          'csrfmiddlewaretoken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+          'text': text
+        })
+      });
+      if (!resp.ok) return;
+      const audioBlob = await resp.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      if (currentAudio) {
+        currentAudio.pause();
+        URL.revokeObjectURL(currentAudio._url);
+      }
+      currentAudio = new Audio(audioUrl);
+      currentAudio._url = audioUrl;
+      currentAudio.play();
+      currentAudio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        currentAudio = null;
+      };
+    } catch (e) {
+      console.error('语音播放失败:', e);
+    }
+  }
 
   // 安全地构造消息气泡，返回 { li, contentDiv } 以便后续追加内容
   function buildMessageItem(type, senderNode, contentText) {
@@ -356,6 +412,9 @@
             }
             if (data.done) {
               botContentDiv.textContent = fullText; // 移除光标
+              if (voiceEnabled && fullText) {
+                playVoice(fullText);
+              }
             }
             if (data.error) {
               botContentDiv.textContent = '错误：' + data.error;
